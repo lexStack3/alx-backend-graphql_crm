@@ -3,8 +3,8 @@ from django.db import models
 
 class Customer(models.Model):
     """A model representation of a <Cusgtomer> instance."""
-    name = models.CharField(max_length=128, blank=False)
-    email = models.EmailField(max_length=128, blank=False)
+    name = models.CharField(max_length=100, blank=False)
+    email = models.EmailField(max_length=100, blank=False)
     phone = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
@@ -14,7 +14,7 @@ class Customer(models.Model):
 
 class Product(models.Model):
     """A model representation of a <Product> instance."""
-    name = models.CharField(max_length=128, blank=False)
+    name = models.CharField(max_length=100, blank=False)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=False)
     stock = models.PositiveIntegerField(default=0)
 
