@@ -3,7 +3,7 @@ from django.db import models
 
 class Customer(models.Model):
     """A model representation of a <Cusgtomer> instance."""
-    name = models.CharField(max_length=100, blank=False)
+    name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, blank=False)
     phone = models.CharField(max_length=15, blank=True, null=True)
 
