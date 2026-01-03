@@ -1,9 +1,11 @@
 import re
 import graphene
 from graphene_django import DjangoObjectType
+from graphene_django.filter import DjangoFilterConnectionField
 from django.db import transaction
 from graphql import GraphQLError
 from .models import Customer, Product, Order
+from .filters import CustomerFilter, ProductFilter, OrderFilter
 
 
 class CustomerType(DjangoObjectType):
@@ -11,12 +13,10 @@ class CustomerType(DjangoObjectType):
         model = Customer
         fields = ("id", "name", "email", "phone")
 
-
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
         fields = ("id", "name", "price", "stock")
-
 
 class OrderType(DjangoObjectType):
     class Meta:
@@ -28,7 +28,6 @@ class OrderType(DjangoObjectType):
             "total_amount",
             "order_date"
         )
-
 
 class CustomerInput(graphene.InputObjectType):
     name = graphene.String(required=True)
@@ -56,7 +55,9 @@ class CreateCustomer(graphene.Mutation):
         input = CustomerInput(required=True)
 
     def mutate(self, info, input):
-        name, email, phone = input['name'], input['email'], input['phone']
+        name = input.name
+        email = input.email
+        phone = input.phone
 
         if Customer.objects.filter(email=email).exists():
             return CreateCustomer(
@@ -187,11 +188,46 @@ class CreateOrder(graphene.Mutation):
         return CreateOrder(order=order)
 
 
+class CustomerNode(DjangoObjectType):
+    class Meta:
+        model = Customer
+        interfaces = (graphene.relay.Node,)
+        filterset_class = CustomerFilter
+
+
+class ProductNode(DjangoObjectType):
+    class Meta:
+        model = Product
+        interfaces = (graphene.relay.Node,)
+        filterset_class = ProductFilter
+
+
+class OrderNode(DjangoObjectType):
+    class Meta:
+        model = Order
+        interfaces = (graphene.relay.Node,)
+        filterset_class = OrderFilter
+
+
 class Query(graphene.ObjectType):
     hello = graphene.String()
     customers = graphene.List(CustomerType)
     products = graphene.List(ProductType)
     orders = graphene.List(OrderType)
+
+    # Filter endpoints
+    all_customers = DjangoFilterConnectionField(
+        CustomerType,
+        filterset_class=CustomerFilter
+    )
+    all_products = DjangoFilterConnectionField(
+        ProductType,
+        filterset_class=ProductFilter
+    )
+    all_orders = DjangoFilterConnectionField(
+        OrderType,
+        filterset_class=OrderFilter
+    )
 
     def resolve_hello(root, info):
         return "Hello, GraphQL!"
