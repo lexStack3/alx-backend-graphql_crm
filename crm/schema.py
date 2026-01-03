@@ -176,10 +176,11 @@ class CreateOrder(graphene.Mutation):
 
         total_amount = sum(product.price for product in products)
 
-        order = Order.objects.create(
+        order = Order(
             customer=customer,
             total_amount=total_amount
         )
+        order.save()
 
         order.products.set(products)
 
